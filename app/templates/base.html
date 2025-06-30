@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}测试用例管理平台{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+ 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">    
+    <link rel="icon" href="{{ url_for('static', filename='img/aperture.svg') }}" type="image/x-icon">  
+    
+    <!-- Tailwind 配置（新增width扩展） -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#4080FF',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        error: '#F53F3F',
+                        info: '#86909C',
+                        neutral: '#86909C',
+                        'neutral-light': '#C9CDD4',
+                        'neutral-dark': '#4E5969',
+                        'bg-light': '#F2F3F5',
+                        'bg-dark': '#1D2129'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    width: {
+                        '90p': '90%',  // 新增：90%宽度类
+                        '95p': '95%',  // 新增：95%宽度类（中屏）
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- 自定义工具类样式 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .hover-lift {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .hover-lift:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+            }
+            .modal-backdrop {
+                backdrop-filter: blur(4px);
+            }
+            .modal-enter {
+                animation: modalEnter 0.3s ease-out forwards;
+            }
+            .modal-leave {
+                animation: modalLeave 0.3s ease-in forwards;
+            }
+            @keyframes modalEnter {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes modalLeave {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(20px); }
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-bg-light flex flex-col min-h-screen">
+<!-- 导航栏 -->
+<nav class="bg-white shadow-md sticky top-0 z-50">    
+    <div class="flex justify-between items-center h-16 w-full px-4 sm:px-6 lg:px-8">         
+        <a href="{{ url_for('main.index') }}" class="flex items-center">
+            <i class="fa-solid fa-atom text-gray-600 text-2xl mr-2"></i>
+            <span class="text-xl font-bold text-neutral-dark">测试用例管理平台</span>
+        </a>        
+        
+        <div class="hidden md:flex items-center space-x-6">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.index') }}" class="text-neutral-dark font-bold hover:text-primary transition-colors duration-200">
+                    <i class="fa-solid fa-home mr-1"></i> 首页
+                </a>
+                <a href="{{ url_for('project.new_project') }}" class="text-neutral-dark font-bold hover:text-primary transition-colors duration-200">
+                    <i class="fa-solid fa-plus-circle mr-1"></i> 新建项目
+                </a>
+                {% if current_user.role.name == config.ADMIN_USERNAME %}
+                    <a href="{{ url_for('admin.index') }}" class="text-neutral-dark font-bold hover:text-primary transition-colors duration-200">
+                        <i class="fa-solid fa-cog mr-1"></i> 后台管理
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="text-neutral-dark font-bold hover:text-primary transition-colors duration-200">
+                    <i class="fa-solid fa-sign-out-alt mr-1"></i> 退出登录
+                </a>                      
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="text-neutral-dark font-bold hover:text-primary transition-colors duration-200">
+                    <i class="fa-solid fa-sign-in-alt mr-1"></i> 登录
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="text-neutral-dark font-bold hover:text-primary transition-colors duration-200">
+                    <i class="fa-solid fa-user-plus mr-1"></i> 注册
+                </a>
+            {% endif %}
+        </div>           
+    </div>
+</nav>
+
+    <!-- 消息闪现区域 -->
+    <div class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 flex justify-center w-full">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert flex items-center justify-center m-1 rounded-lg mb-1 mx-auto overflow-hidden inline-block min-w-[280px] max-w-[90vw]
+                                {% if category == 'success' %} bg-green-500 
+                                {% elif category == 'warning' %} bg-yellow-500 
+                                {% elif category == 'error' %} bg-red-500  
+                                {% elif category == 'info' %} bg-blue-500  
+                                {% else %} bg-neutral-dark {% endif %}
+                                md:px-8 md:py-4">     
+                    <div class="flex-shrink-0 mr-1">
+                        {% if category == 'success' %}
+                            <i class="fa fa-check-circle text-medium"></i>
+                        {% elif category == 'warning' %}
+                            <i class="fa fa-exclamation-triangle text-medium"></i>
+                        {% elif category == 'error' %}
+                            <i class="fa fa-times-circle text-medium"></i>
+                        {% elif category == 'info' %}
+                            <i class="fa fa-info-circle text-medium"></i>
+                        {% else %}
+                            <i class="fa fa-comment text-medium"></i>
+                        {% endif %}
+                    </div>                   
+                        <p class="font-bold text-medium text-gray-800 ">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- 自定义删除确认模态框 -->
+    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-white/70 rounded-xl shadow-2xl w-full max-w-md mx-4 z-10 relative overflow-hidden modal-enter">
+            <div class="p-2">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-medium font-medium text-gray-900">确认删除</h4>
+                    <button id="closeModal" class="text-gray-400 mr-2 hover:text-gray-500 focus:outline-none" onclick="closeDeleteModal()">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+            <div class="flex items-center justify-center mb-6">                
+                <i class="fa fa-exclamation-triangle text-red-500 text-lg mr-3"></i>
+                <p class="mb-1 text-sm text-gray-700" id="deleteMessage"></p>            
+            </div>
+            <div class="flex items-end justify-end">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mr-2" onclick="closeDeleteModal()">取消</button>
+                <form id="deleteForm" action="" method="POST">
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center">删除</button>                        
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="flex-grow pt-[80px] py-6">
+        <div class="mx-auto w-90p md:w-95p lg:w-90p px-4 sm:px-6 lg:px-8">
+            <!-- 页面内容 -->
+            {% block content %}{% endblock %} 
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-neutral-light py-4">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-center items-center">
+                <div class="text-neutral-dark mb-4 md:mb-0">
+                    &copy; 2025 InnoPhase 测试用例管理平台 - 版权所有
+                </div>               
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 自动关闭消息
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const flashMessages = document.querySelectorAll('.alert');
+                flashMessages.forEach(message => {
+                    fadeOutFlashMessage(message);
+                });
+            }, 3000); // 3秒后自动关闭
+        });
+
+        function fadeOutFlashMessage(message) {
+            message.style.transition = 'opacity 0.5s ease-out';
+            message.style.opacity = '0';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 500);
+        }
+        
+    </script>
+   <script src="{{ url_for('static', filename='js/confirm.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{% extends 'admin/base.html' %}
+{% block head %}
+{{super()}}
+
+<link rel="icon" href="{{ url_for('static', filename='img/aperture.svg') }}" type="image/x-icon"> 
+
+{% endblock %}
+
+{% block head_css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        /* 隐藏原始导航栏所有元素  */
+        .navbar {
+            display: none !important;
+        } 
+        /* 扩展内容区域宽度 */
+        .container-fluid {
+            width: 95% !important; /* 替换默认固定宽度，按需调整 */
+            max-width: none !important; /* 取消最大宽度限制 */
+        }
+        /* 表格响应式优化（若用 Flask-Admin 自带表格） */
+        .table {
+            table-layout: auto; /* 自动适配列宽 */
+            width: 100% !important; 
+        }
+    </style>
+{% endblock %}
+
+{% block page_body %}
+    <div class="container{% if config.get('FLASK_ADMIN_FLUID_LAYOUT', False) %}-fluid{% endif %}">
+    {# 定义菜单项与端点的映射 #}
+    {% set menu_endpoints = {
+        '用户管理': 'admin_user',
+        '角色管理': 'admin_role',
+        '项目管理': 'admin_project',
+        '用例管理': 'admin_testcase'
+    } %}
+        <div class="custom-navbar">
+    <!-- 左侧内容：系统名称 + 动态菜单项 -->
+    <div class="left-group">
+        <a href="{{ url_for('admin.index') }}" 
+           {% if request.endpoint == 'admin.index' %}class="active"{% endif %}>
+            {{ admin_view.admin.name }}
+        </a>
+        <!-- 动态生成菜单项 -->
+        {% for item in admin_view.admin.menu() %}
+            {% if not item.is_category() and item.name in menu_endpoints %}
+                {% set endpoint = menu_endpoints[item.name] %}
+                <a href="{{ item.get_url() }}" 
+                   {% if request.endpoint.startswith(endpoint) %}class="active"{% endif %}>
+                    {{ item.name }}
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- 右侧内容：返回首页 + 退出登录 -->
+    <div class="right-group">
+        <a class="right-btn" href="{{ url_for('main.index') }}">返回首页</a> 
+        <a class="right-btn" href="{{ url_for('auth.logout') }}">退出登录</a>
+    </div>
+</div>
+
+        {# 保留原始的消息提示和内容区域 #}
+        {% block messages %}
+            {{ layout.messages() }}
+            
+        {% endblock %}
+
+        {% set render_ctx = h.resolve_ctx() %}
+        {% block body %}{% endblock %}
+    </div>    
+{% endblock %}

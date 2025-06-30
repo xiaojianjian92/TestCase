@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}用户登录{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto mt-8">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="px-6 py-4">
+            <div class="flex items-center justify-center">
+                <i class="fa fa-sign-in text-primary text-2xl mr-2"></i>
+                <h3 class="text-xl font-semibold text-gray-900">Login</h3>
+            </div>
+            <div class="mt-4">
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-4">
+                        {{ form.username.label(class="block text-medium font-semibold text-neutral-dark mb-1") }}
+                        {{ form.username(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent") }}
+                        {% if form.username.errors %}
+                            <div class="text-red-500 text-xs mt-1">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-6">
+                        {{ form.password.label(class="block text-medium font-semibold text-neutral-dark mb-1") }}
+                        {{ form.password(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent") }}
+                        {% if form.password.errors %}
+                            <div class="text-red-500 text-xs mt-1">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-center">
+                            <input id="remember_me" name="remember_me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" {% if form.remember_me.data %}checked{% endif %}>
+                            <label for="remember_me" class="ml-2 block text-sm text-gray-700">{{ form.remember_me.label }}</label>
+                        </div>
+                        {% if form.remember_me.errors %}
+                            <div class="text-red-500 text-xs mt-1">
+                                {% for error in form.remember_me.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {{ form.submit(class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-md transition-custom") }}
+                </form>
+                <div class="mt-4 text-center text-sm text-gray-600">
+                    还没有账号? <a href="{{ url_for('auth.register') }}" class="text-primary hover:text-primary/80">立即注册</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}    

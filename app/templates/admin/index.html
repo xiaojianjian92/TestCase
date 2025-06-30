@@ -1,0 +1,89 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+
+
+<style>
+    /* 容器样式 */
+    .stats-container {
+        max-width: 1200px;
+        margin: 0 auto; /* 水平居中 */
+        padding: 20px; /* 增加内边距，让内容不贴边 */
+        border-radius: 16px;
+    }
+
+    /* 网格布局设置 */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 自动适配列数，最小 250px，最大占满一行 */
+        gap: 24px; /* 卡片之间的间距 */
+    }
+
+    /* 卡片样式 */
+    .stat-card {
+        background: linear-gradient(to right, #44526b, #2a4179);
+        color: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(55, 65, 81, 0.5);
+        padding: 20px; /* 增加内边距，让内容更舒展 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center; /* 文字居中 */
+    }
+
+    /* 数值样式 */
+    .stat-value {
+        font-size: 30px;
+        font-weight: bold;
+        line-height: 1;
+        margin-bottom: 8px; /* 与标签拉开距离 */
+    }
+
+    /* 标签样式 */
+    .stat-label {
+        font-size: 14px;
+        color: rgb(4, 228, 4);
+        font-weight: bold;
+    }
+
+    /* 描述文字样式 */
+    .desc-text {
+        font-size: 20px;
+        font-weight: bold;
+        color: #c0c8d0;
+        line-height: 2;
+        margin-bottom: 12px; /* 与卡片拉开距离 */
+    }
+</style>
+
+<!-- 描述文字 -->
+<p class="desc-text">
+    测试用例后台管理系统
+</p>
+
+<!-- 数据统计卡片容器 -->
+<div class="stats-container">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <p class="stat-value">{{ user_count }}</p>
+            <p class="stat-label">用户总数</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ role_count }}</p>
+            <p class="stat-label">角色总数</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ project_count }}</p>
+            <p class="stat-label">项目总数</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-value">{{ test_case_count }}</p>
+            <p class="stat-label">用例总数</p>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

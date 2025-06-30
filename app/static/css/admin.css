@@ -1,0 +1,58 @@
+.custom-navbar {
+    background-color: #2a5757;
+    padding: 12px 20px;
+    display: flex;          /* Flex 布局 */
+    align-items: center;    /* 垂直居中 */
+    justify-content: space-between; /* 左右分组两端对齐 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* 左侧分组：让菜单项水平排列 */
+.custom-navbar .left-group {
+    display: flex;
+    align-items: center;
+    gap: 20px; 
+}
+
+/* 右侧分组：按钮自然右对齐 */
+.custom-navbar .right-group {
+    display: flex;
+    gap: 20px; /* 按钮之间的间距 */
+}
+
+.custom-navbar a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+/* 高亮状态的菜单项 */
+.custom-navbar a.active {
+    color: orange; 
+    font-weight: 600;
+    border-bottom: 2px solid green; 
+    padding-bottom: 2px;
+}
+
+.custom-navbar a:hover {
+    color: orange;
+    transform: translateY(-1px);
+}
+
+/* 针对 Flask - Admin 表格表头 */
+.table th {
+    white-space: nowrap; /* 强制表头文字不换行 */
+    text-overflow: ellipsis; /* 超出部分显示省略号 */
+    overflow: hidden;
+    vertical-align: middle; /* 垂直居中 */
+}
+
+/* 扩展内容区宽度 */
+.container {
+    width: 90% !important; /* 按需调整，或用 100% */
+    max-width: none !important; /* 取消最大宽度限制 */
+    min-width: auto;
+}

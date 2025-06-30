@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}首页{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+    <div>
+        <h1 class="text-xl font-bold text-neutral-dark mb-4">Welcome Back {{ current_user.username }}</h1>        
+    </div>
+
+<div class="bg-white shadow-md rounded-lg overflow-hidden">
+
+    <div class="overflow-x-auto">
+        {% if project_list %}
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-neutral-dark">项目列表</h3>
+                </div>
+            </div>
+            <table class="w-full border-collapse">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-dark uppercase tracking-wider">项目名称</th>                        
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">项目描述</th>                        
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用例数</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建者</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">            
+                {% for project in project_list %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ project.name }}</td>
+                        {% if project.name.errors %}
+                            <td class="p-2 text-left text-red-500">
+                                {% for error in project.name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </td>              
+                        {% endif %}
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ project.description or "暂无描述"}}</td>
+                        {% if project.description.errors %}
+                            <td class="p-2 text-left text-red-500">
+                                {% for error in project.description.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </td>                
+                        {% endif %}
+
+                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ project.test_cases|length }}</td>
+                        {% if project.test_cases.errors %}
+                            <td class="p-2 text-left text-red-500">
+                                {% for error in project.test_cases.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </td>               
+                        {% endif %}
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ project.created_at.strftime('%Y-%m-%d-%H:%M:%S') }}</td>
+                        {% if project.created_at.errors %}
+                            <td class="p-2 text-left text-red-500">
+                                {% for error in project.created_at.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </td>           
+                        {% endif %}
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ project.creator.username or "未知" }}</td>
+                        {% if project.creator.errors %}
+                            <td class="p-2 text-left text-red-500">
+                                {% for error in project.creator.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </td>           
+                        {% endif %}
+                        
+                       
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{{ url_for('project.project_details', project_id=project.id) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <i class="fa fa-eye">查看详情</i>
+                            </a>
+                            <a href="{{ url_for('project.edit_project', project_id=project.id) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <i class="fa fa-pencil">编辑项目</i>
+                            </a>                             
+                                                   
+                            <button type="button" class="text-red-600 hover:text-red-900" onclick="openProjectDeleteModal('{{ project.id }}', '{{ project.name }}')">
+                                <i class="fa fa-trash">删除项目</i>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>         
+            </table>
+        {% else %}            
+            <!-- 无项目提示卡片 -->
+        <div class="bg-white rounded-xl shadow-md p-8 border border-gray-200 transition-all duration-300">
+            <div class="flex flex-col items-center justify-center text-center">
+                <!-- 浮动的文件夹图标 -->
+                <div class="mb-5 relative">
+                    <svg class="h-20 w-20 text-gray-300 animate-float" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    <!-- 小加号图标 -->
+                    <div class="absolute -bottom-1 -right-1 bg-secondary text-white rounded-full h-8 w-8 flex items-center justify-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    </div>
+                </div>
+            
+                <h3 class="text-xl font-semibold text-gray-700 mb-3">暂无项目信息</h3>
+                <p class="text-gray-500 mb-6 max-w-md">
+                    点击下方按钮开始创建第一个项目
+                </p>
+            
+                <a href="{{ url_for('project.new_project') }}" class="bg-blue-600 hover:bg-blue-800 text-white font-medium py-3 px-3 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg> 
+                    <span class="ml-2">创建项目</span>               
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<!-- 未登录提示卡片 -->
+<div class="flex flex-col items-center justify-center min-h-[70vh] p-4 md:p-8 lg:p-16">
+    <div class="bg-gray-100 p-6 md:p-10 lg:p-12 rounded-lg shadow-md text-center 
+                w-[320px] md:w-[500px] lg:w-[600px]  <!-- 大屏加宽 -->
+                h-auto md:h-[300px] lg:h-[350px]     <!-- 大屏加高 -->
+                flex flex-col justify-center items-center
+                relative z-10">
+        
+        <i class="fa-solid fa-lock fa-3x md:fa-5x lg:fa-6x text-gray-500 mb-3 md:mb-6 lg:mb-8"></i>  
+        
+        
+        <div class="flex flex-col items-center w-full md:w-4/5 lg:w-3/5">  
+            <p class="text-gray-800 text-base md:text-xl lg:text-2xl mb-4 md:mb-6 lg:mb-8">  
+                请先登录或注册
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 md:gap-5 lg:gap-6 justify-center w-full">
+                <a href="{{ url_for('auth.register') }}" 
+                   class="bg-green-600 hover:bg-green-800 text-white font-medium py-2 md:py-3 lg:py-4 
+                          px-4 md:px-6 lg:px-8 rounded-lg text-sm md:text-base lg:text-lg 
+                          transition-all duration-200 transform hover:scale-105">
+                    <i class="fa-solid fa-user-plus mr-2 text-sm md:text-base lg:text-lg"></i> 注册
+                </a>
+                <a href="{{ url_for('auth.login') }}" 
+                   class="bg-blue-600 hover:bg-blue-800 text-white font-medium py-2 md:py-3 lg:py-4 
+                          px-4 md:px-6 lg:px-8 rounded-lg text-sm md:text-base lg:text-lg 
+                          transition-all duration-200 transform hover:scale-105">
+                    <i class="fa-solid fa-sign-in-alt mr-2 text-sm md:text-base lg:text-lg"></i> 登录
+                </a>
+            </div>
+        </div>
+        
+        <i class="fa-solid fa-list-check fa-2x md:fa-4x lg:fa-5x text-gray-300 mt-3 md:mt-6 lg:mt-8"></i>  
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}    

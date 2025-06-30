@@ -1,0 +1,12 @@
+# Python 虚拟环境
+venv/
+env/
+.venv/
+
+# 编译文件
+*.pyc
+__pycache__/
+
+# 日志文件
+*.log
+*.out
